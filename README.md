@@ -3,7 +3,7 @@ The Dog App is a simple Flutter mobile application that brings a delightful coll
 
 ## Features
 
-- Fetches and displays random dog images from the [Dog API](https://dog.ceo/dog-api/).
+- Fetches and displays random dog images from the [Dog CEO's Dog API](https://dog.ceo/dog-api/).
 - Enjoy an endless stream of cute dog pictures to brighten your day.
 - Simple user interface for a seamless browsing experience.
 
@@ -13,7 +13,8 @@ The Dog App is a simple Flutter mobile application that brings a delightful coll
 The Dog App relies on the following packages:
 
 - [http](https://pub.dev/packages/http): For making HTTP requests to the dog image API.
-- [flutter_staggered_grid_view](https://pub.dev/packages/flutter_staggered_grid_view): For creating a grid layout.
+- [carousel_slider]([https://pub.dev/packages/flutter_staggered_grid_view](https://pub.dev/packages/carousel_slider)): For creating a smotth slider layout.
+- [provider](https://pub.dev/packages/provider): For state management.
 
 ## API Used
 
