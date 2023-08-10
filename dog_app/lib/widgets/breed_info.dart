@@ -1,11 +1,10 @@
-import 'dart:convert';
-import 'package:http/http.dart' as http;
+import 'package:dog_app/providers/breed_provider.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class BreedInfo extends StatefulWidget {
   final String breed;
-
   const BreedInfo({Key? key, required this.breed}) : super(key: key);
 
   @override
@@ -18,22 +17,6 @@ class _BreedInfoState extends State<BreedInfo> {
 
   int pageIndex = 0;
 
-  List<String> _dogPictures = [];
-
-  Future<void> fetchDogBreedImages() async {
-    final response = await http
-        .get(Uri.parse('https://dog.ceo/api/breed/${widget.breed}/images'));
-
-    if (response.statusCode == 200) {
-      final Map<String, dynamic> data = json.decode(response.body);
-      final List<String> images = List<String>.from(data['message']);
-      setState(() {
-        _dogPictures = images;
-      });
-    } else {
-      throw Exception('Failed to load breed images');
-    }
-  }
 
   void _nextSlide() {
     _pageController.nextPage();
@@ -47,18 +30,29 @@ class _BreedInfoState extends State<BreedInfo> {
   void initState() {
     super.initState();
     _pageController = CarouselController();
-    fetchDogBreedImages();
-  }
+    Future.delayed(Duration.zero, (){
+    final breedProvider = Provider.of<BreedProvider>(context, listen: false);
+    breedProvider.fetchDogBreedImages(widget.breed);
+    });
 
+  }
 
   @override
   Widget build(BuildContext context) {
+    final breedProvider = Provider.of<BreedProvider>(context);
+    breedProvider.fetchDogBreedImages(widget.breed);
     return Scaffold(
       appBar: AppBar(
           title: Text(widget.breed.toUpperCase()),
           backgroundColor: Colors.black),
-      body: Center(
+      body: breedProvider.dogPictures.isEmpty
+            ? const Center(
+            child: CircularProgressIndicator(
+              backgroundColor: Colors.black, color: Colors.blue,),
+          )
+            : Center(
         child: Column(
+
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
@@ -75,11 +69,12 @@ class _BreedInfoState extends State<BreedInfo> {
                         )),
                     child: Container(
                       padding: const EdgeInsets.all(10),
-                      width: MediaQuery.of(context).size.width * 0.75,
-                      height: MediaQuery.of(context).size.height * 0.75,
-                      child: Expanded(
+                     // width: MediaQuery.of(context).size.width * 0.75,
+                      height: MediaQuery.of(context).size.height * 0.5,
+                      child:
+                      Expanded(
                         child: CarouselSlider.builder(
-                          itemCount: _dogPictures.length,
+                          itemCount: breedProvider.dogPictures.length,
                           itemBuilder: (context, index, realIndex) {
                             return Padding(
                               padding: const EdgeInsets.all(10.0),
@@ -97,7 +92,7 @@ class _BreedInfoState extends State<BreedInfo> {
                                           topRight: Radius.circular(10),
                                           bottomRight: Radius.circular(10)),
                                       child: Image.network(
-                                        _dogPictures[index],
+                                        breedProvider.dogPictures[index],
                                         fit: BoxFit.contain,
                                         alignment: Alignment.center,
                                         loadingBuilder:
@@ -105,15 +100,13 @@ class _BreedInfoState extends State<BreedInfo> {
                                           if (loadingProgress == null) {
                                             return child;
                                           }
-                                          return CircularProgressIndicator(
-                                            value: loadingProgress
-                                                .expectedTotalBytes !=
-                                                null
-                                                ? loadingProgress
-                                                .cumulativeBytesLoaded /
-                                                loadingProgress
-                                                    .expectedTotalBytes!
-                                                : null,
+                                          return Center(
+                                            child: CircularProgressIndicator(color: Colors.blue,backgroundColor: Colors.black,strokeWidth: 5,
+                                              value: loadingProgress.expectedTotalBytes != null
+                                                  ? loadingProgress.cumulativeBytesLoaded /
+                                                  loadingProgress.expectedTotalBytes!
+                                                  : null,
+                                            ),
                                           );
                                         },
                                         errorBuilder:
